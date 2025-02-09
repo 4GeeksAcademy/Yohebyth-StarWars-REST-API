@@ -11,6 +11,7 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
 
     fav_planets = db.relationship("Fav_Planet", back_populates="user",cascade="all, delete-orphan")
+    fav_peoples = db.relationship("Fav_People", back_populates="user",cascade="all, delete-orphan")
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -58,6 +59,8 @@ class People(db.Model):
     gender = db.Column(db.String(20), unique=True, nullable=False)
     img = db.Column(db.String(250), unique=False, nullable=True)
 
+    fav_peoples = db.relationship("Fav_People", back_populates="people",cascade="all, delete-orphan")
+
     def __repr__(self):
         return '<Planet %r>' % self.name
 
@@ -93,4 +96,25 @@ class Fav_Planet(db.Model):
             "user_id": self.user_id,
             "planet_id": self.planet_id,
         }  
+    
+class Fav_People(db.Model):
+    __tablename__ = 'fav_people'
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    people_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+
+    user = db.relationship('User', back_populates="fav_peoples", uselist=False, single_parent=True)
+    people = db.relationship('People', back_populates="fav_peoples", uselist=False, single_parent=True)
+
+
+
+    def __repr__(self):
+        return '<Favorites_people %r>' % self.id
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "people_id": self.people_id,
+        }  
