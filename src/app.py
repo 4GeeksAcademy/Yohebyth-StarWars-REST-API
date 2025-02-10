@@ -37,13 +37,54 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def handle_get_users():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    all_users = User.query.all()
+    all_users = list(map(lambda x: x.serialize(), all_users))
 
-    return jsonify(response_body), 200
+    return jsonify(all_users), 200
+
+@app.route('/user/<int:id>', methods=['GET'])
+def handle_get_user(id):
+    
+    user = User.query.get(id)
+    user = user.serialize()
+
+    return jsonify(user), 200
+
+@app.route('/user', methods=['POST'])
+def handle_add_user():
+    body = request.get_json()
+    print(body)
+
+    if 'name' not in body:
+        return jsonify({'msj': 'Error. Name not empty'}), 400
+    
+    if 'email' not in body:
+        return jsonify({'msj': 'Error. email not empty'}), 400
+    
+    if 'password' not in body:
+        return jsonify({'msj': 'Error. password not empty'}), 400
+    
+    new_user = User()
+    new_user.email = body['email']
+    new_user.name = body['name']
+    new_user.password= body['password']
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(new_user.serialize()), 201
+
+@app.route('/user/<int:id>', methods=['DELETE'])
+def habndle_delete_user(id):
+    user = User.query.get(id)
+    if user is None:
+        return jsonify({'msg': 'id not exist'}), 404
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({}), 204
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

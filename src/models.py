@@ -85,8 +85,6 @@ class Fav_Planet(db.Model):
     user = db.relationship('User', back_populates="fav_planets", uselist=False, single_parent=True)
     planet = db.relationship('Planet', back_populates="fav_planets", uselist=False, single_parent=True)
 
-
-
     def __repr__(self):
         return '<Favorites_Planet %r>' % self.id
 
@@ -106,8 +104,6 @@ class Fav_People(db.Model):
 
     user = db.relationship('User', back_populates="fav_peoples", uselist=False, single_parent=True)
     people = db.relationship('People', back_populates="fav_peoples", uselist=False, single_parent=True)
-
-
 
     def __repr__(self):
         return '<Favorites_people %r>' % self.id
