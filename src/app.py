@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Planet, People, Fav_Planet, Fav_People
 #from models import Person
 
 app = Flask(__name__)
@@ -55,7 +55,6 @@ def handle_get_user(id):
 @app.route('/user', methods=['POST'])
 def handle_add_user():
     body = request.get_json()
-    print(body)
 
     if 'name' not in body:
         return jsonify({'msj': 'Error. Name not empty'}), 400
@@ -65,6 +64,10 @@ def handle_add_user():
     
     if 'password' not in body:
         return jsonify({'msj': 'Error. password not empty'}), 400
+    
+    exist = User.query.filter_by(email = body["email"]).first()
+    if exist: 
+       return jsonify ({"msg":"User already exists"})
     
     new_user = User()
     new_user.email = body['email']
@@ -84,7 +87,39 @@ def habndle_delete_user(id):
     db.session.delete(user)
     db.session.commit()
 
-    return jsonify({}), 204
+    return jsonify({"msg": "Deleted user"}), 204
+
+@app.route('/planet', methods=['GET'])
+def handle_get_planets():
+
+    all_planets = Planet.query.all()
+    all_planets = list(map(lambda x: x.serialize(), all_planets))
+
+    return jsonify(all_planets), 200
+
+@app.route('/planet/<int:id>', methods=['GET'])
+def handle_get_planet(id):
+    
+    planet = Planet.query.get(id)
+    planet = planet.serialize()
+
+    return jsonify(planet), 200
+
+@app.route('/people', methods=['GET'])
+def handle_get_peoples():
+
+    all_peoples = People.query.all()
+    all_peoples = list(map(lambda x: x.serialize(), all_peoples))
+
+    return jsonify(all_peoples), 200
+
+@app.route('/people/<int:id>', methods=['GET'])
+def handle_get_people(id):
+    
+    people = People.query.get(id)
+    people = people.serialize()
+
+    return jsonify(people), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
