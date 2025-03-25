@@ -7,8 +7,8 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    name = db.Column(db.String(32), unique=False, nullable=True) 
-    password = db.Column(db.String(80), unique=False, nullable=False)
+    name = db.Column(db.String(32), nullable=True) 
+    password = db.Column(db.String(80), nullable=False)
 
     fav_planets = db.relationship("Fav_Planet", back_populates="user",cascade="all, delete-orphan")
     fav_peoples = db.relationship("Fav_People", back_populates="user",cascade="all, delete-orphan")
@@ -21,6 +21,8 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "name":self.name,
+            "fav_planets": [fav.planet.serialize() for fav in self.fav_planets],
+            "fav_peoples": [fav.people.serialize() for fav in self.fav_peoples]
         }
     
 class Planet(db.Model):
@@ -28,10 +30,10 @@ class Planet(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
-    diameter = db.Column(db.Integer, unique=False, nullable=False)
-    rotation_period = db.Column(db.Integer, unique=False, nullable=False)
-    gravity = db.Column(db.Integer, unique=False, nullable=False)
-    img = db.Column(db.String(250), unique=False, nullable=True)
+    diameter = db.Column(db.Integer, nullable=False)
+    rotation_period = db.Column(db.Integer, nullable=False)
+    gravity = db.Column(db.Integer, nullable=False)
+    img = db.Column(db.String(250))
 
     fav_planets = db.relationship("Fav_Planet", back_populates="planet",cascade="all, delete-orphan")
 
@@ -45,7 +47,7 @@ class Planet(db.Model):
             "diameter":self.diameter,
             "rotation_period":self.rotation_period,
             "gravity": self.gravity,
-            "img": self.img,
+            "img": self.img
         }
     
 class People(db.Model):
@@ -57,7 +59,7 @@ class People(db.Model):
     height = db.Column(db.String(20), unique=True, nullable=False)
     skin_color = db.Column(db.String(20), unique=True, nullable=False)
     gender = db.Column(db.String(20), unique=True, nullable=False)
-    img = db.Column(db.String(250), unique=False, nullable=True)
+    img = db.Column(db.String(250))
 
     fav_peoples = db.relationship("Fav_People", back_populates="people",cascade="all, delete-orphan")
 
@@ -72,18 +74,18 @@ class People(db.Model):
             "height":self.height,
             "skin_color": self.skin_color,
             "gender": self.gender,
-            "img": self.img,
+            "img": self.img
         }
     
 class Fav_Planet(db.Model):
     __tablename__ = 'fav_planet'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    planet_id = db.Column(db.Integer, db.ForeignKey('planet.id', ondelete='CASCADE'), nullable=False)
 
-    user = db.relationship('User', back_populates="fav_planets", uselist=False, single_parent=True)
-    planet = db.relationship('Planet', back_populates="fav_planets", uselist=False, single_parent=True)
+    user = db.relationship('User', back_populates="fav_planets")
+    planet = db.relationship('Planet', back_populates="fav_planets")
 
     def __repr__(self):
         return '<Favorites_Planet %r>' % self.id
@@ -93,17 +95,18 @@ class Fav_Planet(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "planet_id": self.planet_id,
+            "planet":self.planet.serialize()
         }  
     
 class Fav_People(db.Model):
     __tablename__ = 'fav_people'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    people_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    people_id = db.Column(db.Integer, db.ForeignKey('people.id', ondelete='CASCADE'), nullable=False)
 
-    user = db.relationship('User', back_populates="fav_peoples", uselist=False, single_parent=True)
-    people = db.relationship('People', back_populates="fav_peoples", uselist=False, single_parent=True)
+    user = db.relationship('User', back_populates="fav_peoples")
+    people = db.relationship('People', back_populates="fav_peoples")
 
     def __repr__(self):
         return '<Favorites_people %r>' % self.id
@@ -113,4 +116,5 @@ class Fav_People(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "people_id": self.people_id,
+            "people":self.people.serialize()
         }  
