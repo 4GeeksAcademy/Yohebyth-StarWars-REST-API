@@ -105,6 +105,47 @@ def handle_get_planet(id):
 
     return jsonify(planet), 200
 
+@app.route('/planet', methods=['POST'])
+def handle_add_planet():
+    body = request.get_json()
+
+    if 'name' not in body:
+        return jsonify({'msj': 'Error. Name not empty'}), 400
+    
+    if 'diameter' not in body:
+        return jsonify({'msj': 'Error. Diameter not empty'}), 400
+    
+    if 'rotation_period' not in body:
+        return jsonify({'msj': 'Error. Rotation period not empty'}), 400
+    
+    if 'gravity' not in body:
+        return jsonify({'msj': 'Error. gravity not empty'}), 400
+    
+    exist = Planet.query.filter_by(name = body["name"]).first()
+    if exist: 
+       return jsonify ({"msg":"Planet already exists"})
+    
+    new_planet = Planet()
+    new_planet.name = body['name']
+    new_planet.diameter= body['diameter']
+    new_planet.rotation_period= body['rotation_period']
+    new_planet.gravity= body['gravity']
+
+    db.session.add(new_planet)
+    db.session.commit()
+
+    return jsonify(new_planet.serialize()), 201
+
+@app.route('/planet/<int:id>', methods=['DELETE'])
+def habndle_delete_planet(id):
+    planet = Planet.query.get(id)
+    if planet is None:
+        return jsonify({'msg': 'id not exist'}), 404
+    db.session.delete(planet)
+    db.session.commit()
+
+    return jsonify({"msg": "Deleted planet"}), 204
+
 @app.route('/people', methods=['GET'])
 def handle_get_peoples():
 
@@ -120,6 +161,51 @@ def handle_get_people(id):
     people = people.serialize()
 
     return jsonify(people), 200
+
+@app.route('/people', methods=['POST'])
+def handle_add_people():
+    body = request.get_json()
+
+    if 'name' not in body:
+        return jsonify({'msj': 'Error. Name not empty'}), 400
+    
+    if 'hair_color' not in body:
+        return jsonify({'msj': 'Error. hair_color not empty'}), 400
+    
+    if 'height' not in body:
+        return jsonify({'msj': 'Error. height not empty'}), 400
+    
+    if 'skin_color' not in body:
+        return jsonify({'msj': 'Error. skin color not empty'}), 400
+    
+    if 'gender' not in body:
+        return jsonify({'msj': 'Error. gender not empty'}), 400
+    
+    exist = People.query.filter_by(name = body["name"]).first()
+    if exist: 
+       return jsonify ({"msg":"People already exists"})
+    
+    new_people = People()    
+    new_people.name = body['name']
+    new_people.hair_color = body['hair_color']
+    new_people.height= body['height']
+    new_people.skin_color= body['skin_color']
+    new_people.gender= body['gender']
+
+    db.session.add(new_people)
+    db.session.commit()
+
+    return jsonify(new_people.serialize()), 201
+
+@app.route('/people/<int:id>', methods=['DELETE'])
+def habndle_delete_people(id):
+    people = People.query.get(id)
+    if people is None:
+        return jsonify({'msg': 'id not exist'}), 404
+    db.session.delete(people)
+    db.session.commit()
+
+    return jsonify({"msg": "Deleted people"}), 204
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
