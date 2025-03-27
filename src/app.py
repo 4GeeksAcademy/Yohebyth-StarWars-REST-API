@@ -40,14 +40,18 @@ def sitemap():
 def handle_get_users():
 
     all_users = User.query.all()
+    if not all_users:
+        return jsonify({"msg":"Users empty"}),404
     all_users = list(map(lambda x: x.serialize(), all_users))
 
     return jsonify(all_users), 200
 
-@app.route('/user/<int:id>', methods=['GET'])
-def handle_get_user(id):
+@app.route('/user/<int:user_id>', methods=['GET'])
+def handle_get_user(user_id):
     
-    user = User.query.get(id)
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg":"User not exist"}),404
     user = user.serialize()
 
     return jsonify(user), 200
@@ -57,16 +61,16 @@ def handle_add_user():
     body = request.get_json()
 
     if 'name' not in body:
-        return jsonify({'msj': 'Error. Name not empty'}), 400
+        return jsonify({'msj': 'name is required'}), 400
     
     if 'email' not in body:
-        return jsonify({'msj': 'Error. email not empty'}), 400
+        return jsonify({'msj': 'email is required'}), 400
     
     if 'password' not in body:
-        return jsonify({'msj': 'Error. password not empty'}), 400
+        return jsonify({'msj': 'password is required'}), 400
     
-    exist = User.query.filter_by(email = body["email"]).first()
-    if exist: 
+    user_exist = User.query.filter_by(email = body["email"]).first()
+    if user_exist: 
        return jsonify ({"msg":"User already exists"})
     
     new_user = User()
@@ -79,11 +83,11 @@ def handle_add_user():
 
     return jsonify(new_user.serialize()), 201
 
-@app.route('/user/<int:id>', methods=['DELETE'])
-def habndle_delete_user(id):
-    user = User.query.get(id)
+@app.route('/user/<int:user_id>', methods=['DELETE'])
+def habndle_delete_user(user_id):
+    user = User.query.get(user_id)
     if user is None:
-        return jsonify({'msg': 'id not exist'}), 404
+        return jsonify({'msg': 'user not exist'}), 404
     db.session.delete(user)
     db.session.commit()
 
@@ -93,14 +97,18 @@ def habndle_delete_user(id):
 def handle_get_planets():
 
     all_planets = Planet.query.all()
+    if not all_planets:
+        return jsonify({"msg":"Planets empty"}),404
     all_planets = list(map(lambda x: x.serialize(), all_planets))
 
     return jsonify(all_planets), 200
 
-@app.route('/planet/<int:id>', methods=['GET'])
-def handle_get_planet(id):
+@app.route('/planet/<int:planet_id>', methods=['GET'])
+def handle_get_planet(planet_id):
     
-    planet = Planet.query.get(id)
+    planet = Planet.query.get(planet_id)
+    if not planet:
+        return jsonify({"msg":"Planet not exist"}),404
     planet = planet.serialize()
 
     return jsonify(planet), 200
@@ -108,21 +116,18 @@ def handle_get_planet(id):
 @app.route('/planet', methods=['POST'])
 def handle_add_planet():
     body = request.get_json()
-
-    if not body:
-        return jsonify({"msg": "Request body is missing"}), 400
-
+    
     if 'name' not in body:
-        return jsonify({'msj': 'Error. Name not empty'}), 400
+        return jsonify({'msj': 'name is required'}), 400
     
     if 'diameter' not in body:
-        return jsonify({'msj': 'Error. Diameter not empty'}), 400
+        return jsonify({'msj': 'diameter is required'}), 400
     
     if 'rotation_period' not in body:
-        return jsonify({'msj': 'Error. Rotation period not empty'}), 400
+        return jsonify({'msj': 'rotation_period  is required'}), 400
     
     if 'gravity' not in body:
-        return jsonify({'msj': 'Error. gravity not empty'}), 400
+        return jsonify({'msj': 'gravity is required'}), 400
     
     exist = Planet.query.filter_by(name = body["name"]).first()
     if exist: 
@@ -139,11 +144,12 @@ def handle_add_planet():
 
     return jsonify(new_planet.serialize()), 201
 
-@app.route('/planet/<int:id>', methods=['DELETE'])
-def habndle_delete_planet(id):
-    planet = Planet.query.get(id)
+@app.route('/planet/<int:planet_id>', methods=['DELETE'])
+def habndle_delete_planet(planet_id):
+
+    planet = Planet.query.get(planet_id)
     if planet is None:
-        return jsonify({'msg': 'id not exist'}), 404
+        return jsonify({'msg': 'planet id not exist'}), 404
     db.session.delete(planet)
     db.session.commit()
 
@@ -153,14 +159,18 @@ def habndle_delete_planet(id):
 def handle_get_peoples():
 
     all_peoples = People.query.all()
+    if not all_peoples:
+        return jsonify({"msg": "Peoples empty"}), 404
     all_peoples = list(map(lambda x: x.serialize(), all_peoples))
 
     return jsonify(all_peoples), 200
 
-@app.route('/people/<int:id>', methods=['GET'])
-def handle_get_people(id):
+@app.route('/people/<int:people_id>', methods=['GET'])
+def handle_get_people(people_id):
     
-    people = People.query.get(id)
+    people = People.query.get(people_id)
+    if not people:
+        return jsonify({"msg":"People not exist"}), 404
     people = people.serialize()
 
     return jsonify(people), 200
@@ -169,23 +179,20 @@ def handle_get_people(id):
 def handle_add_people():
     body = request.get_json()
 
-    if not body:
-        return jsonify({"msg": "Request body is missing"}), 400
-
     if 'name' not in body:
-        return jsonify({'msj': 'Error. Name not empty'}), 400
+        return jsonify({'msj': 'name is required'}), 400
     
     if 'hair_color' not in body:
-        return jsonify({'msj': 'Error. hair_color not empty'}), 400
+        return jsonify({'msj': 'hair_color is required'}), 400
     
     if 'height' not in body:
-        return jsonify({'msj': 'Error. height not empty'}), 400
+        return jsonify({'msj': 'height is required'}), 400
     
     if 'skin_color' not in body:
-        return jsonify({'msj': 'Error. skin color not empty'}), 400
+        return jsonify({'msj': 'skin_color is required'}), 400
     
     if 'gender' not in body:
-        return jsonify({'msj': 'Error. gender not empty'}), 400
+        return jsonify({'msj': 'gender is required'}), 400
     
     exist = People.query.filter_by(name = body["name"]).first()
     if exist: 
@@ -203,11 +210,11 @@ def handle_add_people():
 
     return jsonify(new_people.serialize()), 201
 
-@app.route('/people/<int:id>', methods=['DELETE'])
-def habndle_delete_people(id):
-    people = People.query.get(id)
-    if people is None:
-        return jsonify({'msg': 'id not exist'}), 404
+@app.route('/people/<int:people_id>', methods=['DELETE'])
+def habndle_delete_people(people_id):
+    people = People.query.get(people_id)
+    if not people:
+        return jsonify({'msg': 'people id not exist'}), 404
     db.session.delete(people)
     db.session.commit()
 
@@ -216,13 +223,10 @@ def habndle_delete_people(id):
 @app.route('/user/favorites', methods=['GET'])
 def handle_get_user_favorites():
 
-    body = request.get_json()
-    
+    body = request.get_json()    
     user_id = body.get('user_id')
-
     if not user_id:
-        return jsonify({"msg": "user_id are required"}), 400
-    
+        return jsonify({"msg": "user_id are required"}), 400    
     user_exist = User.query.filter_by(id = user_id).first()
     if not user_exist: 
        return jsonify ({"msg":"User not exists"}) 
@@ -237,20 +241,17 @@ def handle_get_user_favorites():
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
 def add_fav_planet(planet_id):
+
     body = request.get_json()
-
     user_id = body.get('user_id')
-
     if not user_id:
         return jsonify({"msg": "user_id are required"}), 400
-
     user_exist = User.query.filter_by(id = user_id).first()
     if not user_exist: 
-       return jsonify ({"msg":"User not exists"})        
-            
+       return jsonify ({"msg":"User not exists"})                 
     exist = Fav_Planet.query.filter_by(user_id = user_id, planet_id = planet_id).first()
     if exist: 
-       return jsonify ({"msg":"People already exists"})
+       return jsonify ({"msg":"favorite planet already exists"})
     
     new_fav_planet = Fav_Planet()    
     new_fav_planet.user_id = user_id
@@ -263,20 +264,17 @@ def add_fav_planet(planet_id):
 
 @app.route('/favorite/people/<int:people_id>', methods=['POST'])
 def add_fav_people(people_id):
+
     body = request.get_json()
-
     user_id = body.get('user_id')
-
     if not user_id:
         return jsonify({"msg": "user_id are required"}), 400
-
     user_exist = User.query.filter_by(id = user_id).first()
     if not user_exist: 
-       return jsonify ({"msg":"User not exists"})        
-            
+       return jsonify ({"msg":"User not exists"})            
     exist = Fav_People.query.filter_by(user_id = user_id, people_id = people_id).first()
     if exist: 
-       return jsonify ({"msg":"People already exists"})
+       return jsonify ({"msg":"Favorite people already exists"})
     
     new_fav_people = Fav_People()    
     new_fav_people.user_id = user_id
@@ -291,22 +289,17 @@ def add_fav_people(people_id):
 def delete_fav_planet(planet_id):
 
     body = request.get_json()
-
     user_id = body.get('user_id')
-
     if not user_id:
-        return jsonify({"msg": "user_id are required"}), 400
-    
+        return jsonify({"msg": "user_id is required"}), 400    
     user_exist = User.query.filter_by(id = user_id).first()
     if not user_exist: 
-       return jsonify ({"msg":"User not exists"}) 
-    
+       return jsonify ({"msg":"User not exists"})    
     planet_exist = Planet.query.filter_by(id = planet_id).first()
     if not planet_exist: 
-       return jsonify ({"msg":"Planet not exists"}) 
-    
+       return jsonify ({"msg":"Planet not exists"})     
     fav_planet = Fav_Planet.query.filter_by(user_id=user_id, planet_id=planet_id).first()
-    if fav_planet is None:
+    if not fav_planet:
         return jsonify({'msg': 'favorite planet not exist'}), 404
     db.session.delete(fav_planet)
     db.session.commit()
@@ -317,20 +310,15 @@ def delete_fav_planet(planet_id):
 def delete_fav_people(people_id):
 
     body = request.get_json()
-
     user_id = body.get('user_id')
-
     if not user_id:
-        return jsonify({"msg": "user_id are required"}), 400
-    
+        return jsonify({"msg": "user_id are required"}), 400    
     user_exist = User.query.filter_by(id = user_id).first()
     if not user_exist: 
-       return jsonify ({"msg":"User not exists"}) 
-    
+       return jsonify ({"msg":"User not exists"})    
     people_exist = People.query.filter_by(id = people_id).first()
     if not people_exist: 
-       return jsonify ({"msg":"People not exists"}) 
-    
+       return jsonify ({"msg":"People not exists"})    
     fav_people = Fav_People.query.filter_by(user_id=user_id, people_id=people_id).first()
     if fav_people is None:
         return jsonify({'msg': 'favorite people not exist'}), 404
