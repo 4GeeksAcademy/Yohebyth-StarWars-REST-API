@@ -32,7 +32,7 @@ class Planet(db.Model):
     name = db.Column(db.String(32), unique=True, nullable=False)
     diameter = db.Column(db.Integer, nullable=False)
     rotation_period = db.Column(db.Integer, nullable=False)
-    gravity = db.Column(db.Integer, nullable=False)
+    gravity = db.Column(db.String(20), nullable=False)
     img = db.Column(db.String(250))
 
     fav_planets = db.relationship("Fav_Planet", back_populates="planet",cascade="all, delete-orphan")
@@ -56,7 +56,7 @@ class People(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
     hair_color = db.Column(db.String(20), unique=True, nullable=False)
-    height = db.Column(db.String(20), unique=True, nullable=False)
+    height = db.Column(db.Integer, nullable=False)
     skin_color = db.Column(db.String(20), unique=True, nullable=False)
     gender = db.Column(db.String(20), unique=True, nullable=False)
     img = db.Column(db.String(250))
@@ -64,7 +64,7 @@ class People(db.Model):
     fav_peoples = db.relationship("Fav_People", back_populates="people",cascade="all, delete-orphan")
 
     def __repr__(self):
-        return '<Planet %r>' % self.name
+        return '<People %r>' % self.name
 
     def serialize(self):
         return {
@@ -88,7 +88,7 @@ class Fav_Planet(db.Model):
     planet = db.relationship('Planet', back_populates="fav_planets")
 
     def __repr__(self):
-        return '<Favorites_Planet %r>' % self.id
+        return '<Fav_Planet %r>' % self.id
 
     def serialize(self):
         return {
@@ -109,7 +109,7 @@ class Fav_People(db.Model):
     people = db.relationship('People', back_populates="fav_peoples")
 
     def __repr__(self):
-        return '<Favorites_people %r>' % self.id
+        return '<Fav_People %r>' % self.id
 
     def serialize(self):
         return {

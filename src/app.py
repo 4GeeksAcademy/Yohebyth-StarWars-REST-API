@@ -109,6 +109,9 @@ def handle_get_planet(id):
 def handle_add_planet():
     body = request.get_json()
 
+    if not body:
+        return jsonify({"msg": "Request body is missing"}), 400
+
     if 'name' not in body:
         return jsonify({'msj': 'Error. Name not empty'}), 400
     
@@ -166,6 +169,9 @@ def handle_get_people(id):
 def handle_add_people():
     body = request.get_json()
 
+    if not body:
+        return jsonify({"msg": "Request body is missing"}), 400
+
     if 'name' not in body:
         return jsonify({'msj': 'Error. Name not empty'}), 400
     
@@ -206,6 +212,132 @@ def habndle_delete_people(id):
     db.session.commit()
 
     return jsonify({"msg": "Deleted people"}), 204
+
+@app.route('/user/favorites', methods=['GET'])
+def handle_get_user_favorites():
+
+    body = request.get_json()
+    
+    user_id = body.get('user_id')
+
+    if not user_id:
+        return jsonify({"msg": "user_id are required"}), 400
+    
+    user_exist = User.query.filter_by(id = user_id).first()
+    if not user_exist: 
+       return jsonify ({"msg":"User not exists"}) 
+    
+    all_user_fav_planets = Fav_Planet.query.filter_by(user_id=user_id)
+    all_user_fav_peoples = Fav_People.query.filter_by(user_id=user_id)
+
+    return jsonify({
+        "favorite planets": [planet.serialize() for planet in all_user_fav_planets],
+        "favorite people": [people.serialize() for people in all_user_fav_peoples]
+    }), 200
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+def add_fav_planet(planet_id):
+    body = request.get_json()
+
+    user_id = body.get('user_id')
+
+    if not user_id:
+        return jsonify({"msg": "user_id are required"}), 400
+
+    user_exist = User.query.filter_by(id = user_id).first()
+    if not user_exist: 
+       return jsonify ({"msg":"User not exists"})        
+            
+    exist = Fav_Planet.query.filter_by(user_id = user_id, planet_id = planet_id).first()
+    if exist: 
+       return jsonify ({"msg":"People already exists"})
+    
+    new_fav_planet = Fav_Planet()    
+    new_fav_planet.user_id = user_id
+    new_fav_planet.planet_id = planet_id
+
+    db.session.add(new_fav_planet)
+    db.session.commit()
+
+    return jsonify(new_fav_planet.serialize()), 201
+
+@app.route('/favorite/people/<int:people_id>', methods=['POST'])
+def add_fav_people(people_id):
+    body = request.get_json()
+
+    user_id = body.get('user_id')
+
+    if not user_id:
+        return jsonify({"msg": "user_id are required"}), 400
+
+    user_exist = User.query.filter_by(id = user_id).first()
+    if not user_exist: 
+       return jsonify ({"msg":"User not exists"})        
+            
+    exist = Fav_People.query.filter_by(user_id = user_id, people_id = people_id).first()
+    if exist: 
+       return jsonify ({"msg":"People already exists"})
+    
+    new_fav_people = Fav_People()    
+    new_fav_people.user_id = user_id
+    new_fav_people.people_id = people_id
+
+    db.session.add(new_fav_people)
+    db.session.commit()
+
+    return jsonify(new_fav_people.serialize()), 201
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_fav_planet(planet_id):
+
+    body = request.get_json()
+
+    user_id = body.get('user_id')
+
+    if not user_id:
+        return jsonify({"msg": "user_id are required"}), 400
+    
+    user_exist = User.query.filter_by(id = user_id).first()
+    if not user_exist: 
+       return jsonify ({"msg":"User not exists"}) 
+    
+    planet_exist = Planet.query.filter_by(id = planet_id).first()
+    if not planet_exist: 
+       return jsonify ({"msg":"Planet not exists"}) 
+    
+    fav_planet = Fav_Planet.query.filter_by(user_id=user_id, planet_id=planet_id).first()
+    if fav_planet is None:
+        return jsonify({'msg': 'favorite planet not exist'}), 404
+    db.session.delete(fav_planet)
+    db.session.commit()
+
+    return jsonify({"msg": "Deleted favorite planet"}), 204
+
+@app.route('/favorite/people/<int:people_id>', methods=['DELETE'])
+def delete_fav_people(people_id):
+
+    body = request.get_json()
+
+    user_id = body.get('user_id')
+
+    if not user_id:
+        return jsonify({"msg": "user_id are required"}), 400
+    
+    user_exist = User.query.filter_by(id = user_id).first()
+    if not user_exist: 
+       return jsonify ({"msg":"User not exists"}) 
+    
+    people_exist = People.query.filter_by(id = people_id).first()
+    if not people_exist: 
+       return jsonify ({"msg":"People not exists"}) 
+    
+    fav_people = Fav_People.query.filter_by(user_id=user_id, people_id=people_id).first()
+    if fav_people is None:
+        return jsonify({'msg': 'favorite people not exist'}), 404
+    db.session.delete(fav_people)
+    db.session.commit()
+
+    return jsonify({"msg": "Deleted favorite people"}), 204
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
